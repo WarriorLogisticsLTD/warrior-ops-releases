@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Warrior Ops — Release notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&display=swap">
+<style>
+  :root{--red:#ED1C24;--ink:#111111;--paper:#f4f4f5;--line:#dfe0e2;--grey:#6b7280;--card:#fff;--body-ink:#111;--soft:#f8f8f9;}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0c0c0d;--card:#161618;--body-ink:#f1f1f2;--line:#2b2b2f;--grey:#9a9aa2;--soft:#1c1c1f;}}
+  :root[data-theme="dark"]{--paper:#0c0c0d;--card:#161618;--body-ink:#f1f1f2;--line:#2b2b2f;--grey:#9a9aa2;--soft:#1c1c1f;}
+  *{box-sizing:border-box}
+  body{margin:0;padding:34px 18px 64px;background:radial-gradient(circle at top left,rgba(237,28,36,.12),transparent 30%),var(--paper);background-attachment:fixed;color:var(--body-ink);font-family:"Inter",ui-sans-serif,system-ui,-apple-system,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .note{max-width:760px;margin:0 auto;border-radius:28px;box-shadow:0 20px 80px rgba(17,17,17,.14)}
+  .mast{position:relative;overflow:hidden;background:var(--ink);border-radius:28px 28px 0 0;padding:30px 30px 32px}
+  .mast::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top left,rgba(237,28,36,.28),transparent 55%)}
+  .mast>*{position:relative;z-index:1}
+  .lockup{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+  .bar{width:4px;height:26px;background:var(--red);border-radius:2px}
+  .wordmark{color:#fff;font-weight:900;font-size:13px;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}
+  .sub{color:rgba(255,255,255,.45);font-weight:700;font-size:9px;letter-spacing:.16em;text-transform:uppercase;margin-top:2px}
+  h1{font-family:"Oswald","Inter",sans-serif;font-weight:700;color:#fff;font-size:clamp(26px,5vw,36px);text-transform:uppercase;line-height:1.06;margin:0 0 12px}
+  .standfirst{color:rgba(255,255,255,.72);margin:0;max-width:52ch;font-size:15.5px}
+  .body{background:var(--card);border:1px solid var(--line);border-top:none;border-radius:0 0 28px 28px;padding:28px 30px 30px;display:flex;flex-direction:column;gap:10px}
+  .rel{display:block;text-decoration:none;color:inherit;background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:18px 20px;transition:border-color .15s,transform .15s}
+  .rel:hover{border-color:var(--red);transform:translateY(-1px)}
+  .rel:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  .rel .d{display:block;font-size:9.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--red);margin-bottom:7px}
+  .rel .t{display:block;font-family:"Oswald","Inter",sans-serif;font-weight:600;font-size:19px;text-transform:uppercase;line-height:1.15;margin-bottom:5px}
+  .rel .b{display:block;font-size:14.5px;color:var(--grey)}
+  footer{max-width:760px;margin:26px auto 0;font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);text-align:center}
+  @media (max-width:560px){body{padding:20px 12px 48px}.mast{padding:24px 21px 26px;border-radius:22px 22px 0 0}.body{padding:22px 21px 24px;border-radius:0 0 22px 22px}.note{border-radius:22px}}
+</style>
+</head>
+<body>
+<article class="note">
+  <header class="mast">
+    <div class="lockup"><div class="bar"></div><div>
+      <div class="wordmark">Warrior Ops</div><div class="sub">Release notes</div></div></div>
+    <h1>What's new</h1>
+    <p class="standfirst">Every change worth knowing about, written for the people running stations — what it does, how it works, and what to watch for.</p>
+  </header>
+  <div class="body">
+      <a class="rel" href="cq-auto-refresh/">
+        <span class="d">27 August 2026</span>
+        <span class="t">Van checks fill themselves in</span>
+        <span class="b">The ClearQuote tracker now updates itself every hour — nobody presses anything for the morning's checks to appear.</span>
+      </a>
+  </div>
+</article>
+<footer>Warrior Ops · Questions to Dan</footer>
+</body>
+</html>

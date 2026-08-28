@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Van checks fill themselves in — Warrior Ops release</title>
+<meta name="description" content="The ClearQuote tracker now updates itself every hour. What it's for, how it works, what changes for you, and the quirks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&display=swap">
+<style>
+  /* ── Warrior Ops brand tokens (tailwind.config.ts) ───────────────── */
+  :root{
+    --red:#ED1C24; --red-d:#c4141b;
+    --ink:#111111; --ink-2:#1d1d1d; --ink-3:#080808;
+    --paper:#f4f4f5; --line:#dfe0e2; --grey:#6b7280; --grey-bg:#eceef0;
+    --graphite:#262626; --amber:#f59e0b;
+    --card:#ffffff; --body-ink:#111111; --soft:#f8f8f9;
+    --display:"Oswald","Inter",ui-sans-serif,system-ui,sans-serif;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  /* The masthead is pinned ink in both themes — cinematic surfaces never flip.
+     Only the body card follows the reader's theme. */
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#0c0c0d; --card:#161618; --body-ink:#f1f1f2; --line:#2b2b2f;
+      --grey:#9a9aa2; --grey-bg:#202024; --soft:#1c1c1f;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0c0c0d; --card:#161618; --body-ink:#f1f1f2; --line:#2b2b2f;
+    --grey:#9a9aa2; --grey-bg:#202024; --soft:#1c1c1f;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:34px 18px 64px;
+    background:
+      radial-gradient(circle at top left, rgba(237,28,36,0.12), transparent 30%),
+      var(--paper);
+    background-attachment:fixed;
+    color:var(--body-ink);
+    font-family:var(--sans); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility;
+  }
+  .note{max-width:760px; margin:0 auto; box-shadow:0 20px 80px rgba(17,17,17,0.14); border-radius:28px;}
+
+  /* ── Masthead: ink block with the red radial wash ─────────────────── */
+  .mast{
+    position:relative; overflow:hidden; background:var(--ink);
+    border-radius:28px 28px 0 0; padding:30px 30px 34px;
+  }
+  .mast::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(circle at top left, rgba(237,28,36,0.28), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(255,255,255,0.06), transparent 20%);
+  }
+  .mast > *{position:relative; z-index:1;}
+  .lockup{
+    display:flex; align-items:center; gap:10px; margin-bottom:26px;
+  }
+  .lockup .bar{width:4px; height:26px; background:var(--red); border-radius:2px; flex:none;}
+  .lockup .wordmark{
+    color:#fff; font-weight:900; font-size:13px; letter-spacing:.06em;
+    text-transform:uppercase; line-height:1.1;
+  }
+  .lockup .sub{
+    color:rgba(255,255,255,.45); font-weight:700; font-size:9px;
+    letter-spacing:.16em; text-transform:uppercase; margin-top:2px;
+  }
+  .eyebrow{
+    color:var(--red); font-size:10px; font-weight:800; letter-spacing:.28em;
+    text-transform:uppercase; margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--display); font-weight:700; color:#fff;
+    font-size:clamp(28px,5.4vw,40px); line-height:1.06; letter-spacing:.005em;
+    text-transform:uppercase; margin:0 0 14px; text-wrap:balance;
+  }
+  .standfirst{
+    color:rgba(255,255,255,.74); font-size:16px; margin:0; max-width:54ch; font-weight:400;
+  }
+  .standfirst strong{color:#fff; font-weight:700;}
+  .tags{display:flex; flex-wrap:wrap; gap:7px; margin-top:22px;}
+  .tag{
+    font-size:9.5px; font-weight:800; letter-spacing:.13em; text-transform:uppercase;
+    padding:6px 11px; border-radius:999px;
+    background:rgba(255,255,255,.08); color:rgba(255,255,255,.82);
+    border:1px solid rgba(255,255,255,.14);
+  }
+  .tag.live{background:rgba(237,28,36,.16); border-color:rgba(237,28,36,.5); color:#ff8b90;}
+
+  /* ── Body card ────────────────────────────────────────────────────── */
+  .body{
+    background:var(--card); border:1px solid var(--line); border-top:none;
+    border-radius:0 0 28px 28px; padding:34px 30px 30px;
+  }
+  h2{
+    font-size:10.5px; font-weight:800; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--grey); margin:0 0 16px; padding-bottom:9px; border-bottom:1px solid var(--line);
+  }
+  section{margin:0 0 38px;} section:last-of-type{margin-bottom:0;}
+  p{margin:0 0 13px;} p:last-child{margin-bottom:0;}
+
+  /* one-line summary */
+  .oneline{
+    border-left:4px solid var(--red); background:var(--soft);
+    padding:17px 20px; border-radius:0 12px 12px 0; margin-bottom:38px;
+  }
+  .oneline p{font-size:17px; font-weight:600; line-height:1.5;}
+
+  /* what it's for */
+  .uses{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;}
+  .uses li{position:relative; padding-left:26px; font-size:15.5px;}
+  .uses li::before{
+    content:""; position:absolute; left:0; top:9px;
+    width:9px; height:9px; background:var(--red); border-radius:2px;
+  }
+  .uses strong{font-weight:700;}
+
+  /* how it works */
+  .steps{display:flex; flex-direction:column; gap:2px;}
+  .step{
+    display:grid; grid-template-columns:34px 1fr; gap:16px;
+    padding:15px 0; border-bottom:1px solid var(--line);
+  }
+  .step:last-child{border-bottom:none;}
+  .step .n{
+    font-family:var(--display); font-weight:600; font-size:17px; color:var(--red);
+    line-height:1.2; font-variant-numeric:tabular-nums;
+  }
+  .step h3{font-size:15px; font-weight:700; margin:0 0 4px;}
+  .step p{font-size:14.5px; color:var(--grey); margin:0;}
+  .step p strong{color:var(--body-ink); font-weight:600;}
+
+  /* what changes for you */
+  .roles{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px;}
+  .role{background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:16px 18px;}
+  .role .who{
+    font-size:9.5px; font-weight:800; letter-spacing:.15em; text-transform:uppercase;
+    color:var(--red); margin:0 0 8px;
+  }
+  .role p{font-size:14.5px; margin:0;}
+
+  /* quirks */
+  .quirks{display:flex; flex-direction:column; gap:9px;}
+  .quirks details{background:var(--soft); border:1px solid var(--line); border-radius:14px;}
+  .quirks summary{
+    cursor:pointer; list-style:none; padding:14px 18px;
+    font-size:14.5px; font-weight:700;
+    display:flex; justify-content:space-between; align-items:center; gap:14px;
+  }
+  .quirks summary::-webkit-details-marker{display:none;}
+  .quirks summary::after{content:"+"; color:var(--red); font-weight:800; font-size:18px; flex:none; line-height:1;}
+  .quirks details[open] summary::after{content:"–";}
+  .quirks summary:focus-visible{outline:2px solid var(--red); outline-offset:2px; border-radius:14px;}
+  .quirks .a{padding:0 18px 15px; font-size:14px; color:var(--grey);}
+  .quirks .a strong{color:var(--body-ink); font-weight:700;}
+  .quirks .a p{margin:0 0 8px;}
+
+  /* limits */
+  .limits{
+    border:1px solid var(--line); border-left:4px solid var(--amber);
+    background:var(--soft); border-radius:0 14px 14px 0; padding:17px 20px;
+  }
+  .limits .lt{
+    font-size:9.5px; font-weight:800; letter-spacing:.15em; text-transform:uppercase;
+    color:var(--amber); margin:0 0 9px;
+  }
+  .limits ul{margin:0; padding-left:19px; display:flex; flex-direction:column; gap:7px; font-size:14.5px;}
+
+  footer{
+    margin-top:34px; padding-top:18px; border-top:1px solid var(--line);
+    display:flex; flex-wrap:wrap; gap:6px 20px; justify-content:space-between;
+    font-size:10px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--grey);
+  }
+
+  @media (max-width:560px){
+    body{padding:20px 12px 48px;}
+    .mast{padding:24px 21px 27px; border-radius:22px 22px 0 0;}
+    .body{padding:27px 21px 24px; border-radius:0 0 22px 22px;}
+    .note{border-radius:22px;}
+    .step{grid-template-columns:26px 1fr; gap:12px;}
+  }
+</style>
+</head>
+<body>
+
+<article class="note">
+
+  <header class="mast">
+    <div class="lockup">
+      <div class="bar"></div>
+      <div>
+        <div class="wordmark">Warrior Ops</div>
+        <div class="sub">Release note</div>
+      </div>
+    </div>
+
+    <p class="eyebrow">Now live · 27 August 2026</p>
+    <h1>Van checks fill themselves in</h1>
+    <p class="standfirst">
+      The ClearQuote tracker now <strong>updates itself every hour</strong>. Nobody
+      presses anything for the morning's checks to appear, and a van only ever shows
+      Clear when ClearQuote's finished report says so.
+    </p>
+
+    <div class="tags">
+      <span class="tag live">Live now</span>
+      <span class="tag">Station managers</span>
+      <span class="tag">No training needed</span>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <div class="oneline">
+      <p>Open the tracker and the day is already filled in — your job is now only the red vans.</p>
+    </div>
+
+    <section>
+      <h2>What it's for</h2>
+      <ul class="uses">
+        <li><strong>Seeing the morning's van checks without chasing them.</strong> The board populates through the morning on its own, so the first look at 9am is already current.</li>
+        <li><strong>Knowing which vans actually need a person.</strong> Red means a human has to look; everything else is either fine or still working itself out.</li>
+        <li><strong>Catching new damage against the previous check</strong> with before-and-after photos of the same panel, so what changed is visible rather than argued about.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="n">01</span>
+          <div>
+            <h3>Drivers photograph their vans</h3>
+            <p>Start of shift, from about 6am — exactly as they do now. Nothing changes for drivers.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="n">02</span>
+          <div>
+            <h3>The tracker pulls from ClearQuote by itself</h3>
+            <p>Every hour between 6am and 6pm, one station at a time. Vans go green through the morning with <strong>nobody pressing anything</strong>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="n">03</span>
+          <div>
+            <h3>Each van gets an honest status</h3>
+            <p>Clear, or still analysing, or stuck at ClearQuote. A van <strong>never claims to be fine</strong> just because the report hasn't arrived.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="n">04</span>
+          <div>
+            <h3>The evening sweep reconciles the day</h3>
+            <p>Every van from the whole day is re-read against ClearQuote, so the day ends matching their records — including anything their system finished late.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>What changes for you</h2>
+      <div class="roles">
+        <div class="role">
+          <p class="who">Station manager</p>
+          <p>Stop pressing refresh. Work the red vans only — those are the ones ClearQuote is stuck on and a person needs to eyeball.</p>
+        </div>
+        <div class="role">
+          <p class="who">Drivers</p>
+          <p>Nothing. Same photos, same time. A driver is never pre-blamed for damage found on their check.</p>
+        </div>
+        <div class="role">
+          <p class="who">Management</p>
+          <p>The day's check position is accurate without anyone maintaining it, and every finding is dated to the day the check happened.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Looks wrong, but is correct</h2>
+      <div class="quirks">
+        <details>
+          <summary>A van sat on "Analysing" for an hour</summary>
+          <div class="a"><p>Normal. ClearQuote's AI genuinely takes 30–90 minutes. The old tracker hid that wait by calling vans clear early — <strong>the delay was always there, it's just visible now.</strong> Past two hours it turns red and asks for eyes.</p></div>
+        </details>
+        <details>
+          <summary>A damage appeared dated to last Tuesday</summary>
+          <div class="a"><p>The system catching up, not a glitch. When ClearQuote finishes a stuck report days later, the finding is filed under <strong>the day the check actually happened</strong>. These used to disappear entirely.</p></div>
+        </details>
+        <details>
+          <summary>A red van — is that the driver's fault?</summary>
+          <div class="a"><p><strong>No.</strong> Red means the driver did their check and ClearQuote's system is stuck producing the report. Their photos are on the row, so you can judge the van yourself.</p></div>
+        </details>
+      </div>
+    </section>
+
+    <section>
+      <h2>Where the limits are</h2>
+      <div class="limits">
+        <p class="lt">Known and deliberate</p>
+        <ul>
+          <li>Report timing is ClearQuote's, not ours — a stuck van stays stuck until their system finishes it. We chase repeated jams with their team.</li>
+          <li>Nothing is deducted automatically. ClearQuote suggests; a manager confirms; the damage process is unchanged.</li>
+          <li>A flag you set by hand overrides the automatic feed until you hand it back.</li>
+        </ul>
+      </div>
+    </section>
+
+  </div>
+</article>
+
+<footer style="max-width:760px;margin:0 auto;">
+  <span>Warrior Ops · Release note</span>
+  <span>27 August 2026</span>
+  <span>Questions to Dan</span>
+</footer>
+
+</body>
+</html>
