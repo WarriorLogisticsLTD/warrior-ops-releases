@@ -1,5 +1,11 @@
 [
   {
+    "slug": "cross-station-support",
+    "title": "Lend a driver, keep the pay straight",
+    "blurb": "Send a driver to help another station for a few shifts \u2014 one record, their own G-Number, both pay sheets right.",
+    "date": "28 August 2026"
+  },
+  {
     "slug": "cq-auto-refresh",
     "title": "Van checks fill themselves in",
     "blurb": "The ClearQuote tracker now updates itself every hour \u2014 nobody presses anything for the morning's checks to appear.",
